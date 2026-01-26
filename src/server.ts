@@ -1,8 +1,8 @@
-import Server = require("http");
+import http = require("http");
 import mongoose = require("mongoose");
 import app = require("./app");
 
-let server;
+let server: http.Server;
 
 const startServer = async () => {
   try {
@@ -21,3 +21,46 @@ const startServer = async () => {
 };
 
 startServer();
+
+// Unhandled rejection error
+process.on("unhandledRejection", (err) => {
+  console.log("Unhandled Rejection Detected... Server shutting down..", err);
+
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
+//unhandled rejection error
+// Promise.reject(new Error("I Forgot to catch this promis"));
+
+//Uncaught rejection error
+process.on("uncaughtException", (err) => {
+  console.log("Uncaught Exception Detected... Server shutting down..", err);
+
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
+//uncaught exception error
+// throw new Error("I forgot to handle this local error")
+
+//Signal termination - sigTerm
+process.on("SIGTERM", (err) => {
+  console.log("SIGTERM signal received... Server shutting down..", err);
+
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  }
+
+  process.exit(1);
+});
