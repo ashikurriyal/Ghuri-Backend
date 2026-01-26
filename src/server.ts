@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import http = require("http");
 import mongoose = require("mongoose");
 import app = require("./app");
