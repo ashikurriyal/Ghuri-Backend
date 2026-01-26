@@ -2,19 +2,21 @@
 import http = require("http");
 import mongoose = require("mongoose");
 import app = require("./app");
+import envVars = require("./app/config/env");
 
 let server: http.Server;
 
 const startServer = async () => {
   try {
+    // console.log(envVars.NODE_ENV)
     await mongoose.connect(
       "mongodb+srv://riyalashikur:KmTXd0pC0zSDkSat@cluster0.yimv6lc.mongodb.net/ghuri-tour-management-backend",
     );
 
     console.log("Connected to DB!!");
 
-    server = app.listen(5001, () => {
-      console.log("Server is listening to port 5001");
+    server = app.listen(envVars.PORT, () => {
+      console.log(`Server is listening to port ${envVars.PORT}`);
     });
   } catch (error) {
     console.log(error);
