@@ -1,29 +1,74 @@
-import { Request, Response } from "express";
-import { User } from "./user.model";
-import httpStatus from "http-status-codes"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+//controller works for req res handling between server
 
-const createUser = async (req: Request, res: Response) => {
-    try {
-        const {name, email} = req.body;
-        const user = await User.create({
-            name: name,
-            email: email
-        })
-        res.status(httpStatus.CREATED).json({
-            message: "User Created Successfully!!",
-            user
-        })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-        console.log(err);
-        res.status(httpStatus.BAD_REQUEST).json({
-            message: `Something Went Wrong!! ${err.message}`,
-            err
-        })
-    }
-}
+import { NextFunction, Request, Response } from "express";
+import httpStatus from "http-status-codes";
+import { UserServices } from "./user.service";
+import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
 
+// const createUserFunction = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction,
+// ) => {
+//   const user = await UserServices.createUser(req.body);
+
+//   res.status(httpStatus.CREATED).json({
+//     message: "User Created Successfully!!",
+//     user,
+//   });
+// };
+
+// const createUser = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     throw new AppError(httpStatus.BAD_REQUEST, "fake error", "");
+//   } catch (err: any) {
+//     console.log(err);
+//     next(err);
+//   }
+// };
+
+const createUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = await UserServices.createUser(req.body);
+
+    // res.status(httpStatus.CREATED).json({
+    //   message: "User Created Successfully!!",
+    //   user,
+    // });
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "User Created Successfully!",
+      data: user,
+    });
+  },
+);
+
+const getAllUsers = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const result = await UserServices.getAllUsers();
+    // res.status(httpStatus.OK).json({
+    //   success: true,
+    //   message: "All Users Retrieved Successfully",
+    //   data: users
+    // });
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "All User Retrived Successfully!",
+      data: result.data,
+      meta: result.meta,
+    });
+  },
+);
 
 export const UserControllers = {
-    createUser
-}
+  createUser,
+  getAllUsers,
+};
+
+//Route matching => Controller => service => model => DB
