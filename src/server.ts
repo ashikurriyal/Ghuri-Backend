@@ -9,9 +9,7 @@ let server: http.Server;
 const startServer = async () => {
   try {
     // console.log(envVars.NODE_ENV)
-    await mongoose.connect(
-      "mongodb+srv://riyalashikur:KmTXd0pC0zSDkSat@cluster0.yimv6lc.mongodb.net/ghuri-tour-management-backend",
-    );
+    await mongoose.connect(envVars.DB_URL);
 
     console.log("Connected to DB!!");
 
