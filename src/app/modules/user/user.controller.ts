@@ -3,10 +3,12 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status-codes"
 import { UserServices } from "./user.service";
+import AppError from "../../errorHelpers/AppError";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        throw new AppError(httpStatus.BAD_REQUEST, "fake error", '')
         const user = await UserServices.createUser(req.body)
         
         res.status(httpStatus.CREATED).json({
