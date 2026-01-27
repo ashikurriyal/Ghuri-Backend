@@ -2,6 +2,7 @@ import Express = require("express");
 import cors from "cors";
 import { router } from "./app/Routes";
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
+import { notFound } from "./app/middlewares/notFound";
 
 const app = Express();
 app.use(Express.json());
@@ -16,5 +17,8 @@ app.get("/", (req: Express.Request, res: Express.Response) => {
 });
 
 app.use(globalErrorHandler);
+
+//Not Found Error - Must be in the bottom of the globalErrorHandler
+app.use(notFound);
 
 export = app;
