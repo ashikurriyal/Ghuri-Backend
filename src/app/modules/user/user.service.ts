@@ -3,6 +3,7 @@ import { IAuthProvider, IUser } from "./user.interface";
 import { User } from "./user.model";
 import httpStatus from "http-status-codes";
 import bcryptjs from "bcryptjs";
+import envVars from "../../config/env";
 
 const createUser = async (payload: IUser) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -14,7 +15,7 @@ const createUser = async (payload: IUser) => {
     throw new AppError(httpStatus.BAD_REQUEST, "User Already Exists");
   }
 
-  const hashedPassword = await bcryptjs.hash(password as string, 10)
+  const hashedPassword = await bcryptjs.hash(password as string, Number(envVars.BCRYPT_SALT_AROUND))
 
   // const isPasswordMatch = await bcryptjs.compare(password as string, hashedPassword)
 

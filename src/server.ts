@@ -3,6 +3,7 @@ import http = require("http");
 import mongoose = require("mongoose");
 import app = require("./app");
 import envVars = require("./app/config/env");
+import { seedSuperAdmin } from "./app/utils/seedSuperAdmin";
 
 let server: http.Server;
 
@@ -21,7 +22,10 @@ const startServer = async () => {
   }
 };
 
-startServer();
+(async () => {
+  await startServer();
+  await seedSuperAdmin();
+})()
 
 // Unhandled rejection error
 process.on("unhandledRejection", (err) => {
