@@ -1,13 +1,32 @@
-//api's business logic & functionalities are in service file
-
-import { IUser } from "./user.interface";
+import AppError from "../../errorHelpers/AppError";
+import { IAuthProvider, IUser } from "./user.interface";
 import { User } from "./user.model";
+import httpStatus from "http-status-codes";
+import bcryptjs from "bcryptjs";
 
 const createUser = async (payload: IUser) => {
-  const { name, email } = payload;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { email, auths, password, ...rest } = payload;
+
+  const isUserExist = await User.findOne({ email })
+
+  if (isUserExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User Already Exists");
+  }
+
+  const hashedPassword = await bcryptjs.hash(password as string, 10)
+
+  // const isPasswordMatch = await bcryptjs.compare(password as string, hashedPassword)
+
+  // console.log(isPasswordMatch)
+
+  const authProvider: IAuthProvider = { provider: 'credentials', providerId: email as string };
+
   const user = await User.create({
-    name,
     email,
+    auths: [authProvider],
+    password: hashedPassword,
+    ...rest
   });
 
   return user;
