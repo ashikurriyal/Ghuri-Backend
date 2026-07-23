@@ -9,7 +9,7 @@ export enum Role {
 
 //authProviders = emailpassword, google auth,
 export interface IAuthProvider {
-  provider: string; //Google, Credential
+  provider: "google" | "credentials"; //Google, Credential
   providerId: string;
 }
 
@@ -20,6 +20,7 @@ export enum IsActive {
 }
 
 export interface IUser {
+  _id ?: mongoose.Types.ObjectId
   name: string;
   email: string;
   password?: string;
