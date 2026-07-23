@@ -3,7 +3,7 @@
 class AppError extends Error {
     public statusCode : number ;
 
-    constructor(statusCode: number, message: string, stack:''){
+    constructor(statusCode: number, message: string, stack?:''){
         super(message) //throw new error('something went wrong')
         this.statusCode = statusCode;
         
