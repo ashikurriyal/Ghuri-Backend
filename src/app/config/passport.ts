@@ -15,14 +15,20 @@ passport.use(
         try {
 
             const isUserExist = await User.findOne({ email })
+            // if (!isUserExist) {
+            //     return done(null, false, { message: "User does not exist" })
+            // }
             if (!isUserExist) {
-                return done(null, false, { message: "User does not exist" })
+                return done("User does not exist");
             }
 
             const isGoogleAuthenticated = isUserExist.auths.some(providerObjects => providerObjects.provider == "google")
 
-            if(isGoogleAuthenticated){
-                return done(null, false, {message: "You are authenticated through Google Authentication. For credentials login, login with google first and create a password"})
+            // if(isGoogleAuthenticated){
+            //     return done(null, false, {message: "You are authenticated through Google Authentication. For credentials login, login with google first and create a password"})
+            // }
+            if(isGoogleAuthenticated && !isUserExist.password){
+                return done("You are authenticated through Google Authentication. For credentials login, login with google first and create a password")
             }
 
             const isPasswordMatch = await bcryptjs.compare(password as string, isUserExist.password as string)
@@ -33,7 +39,7 @@ passport.use(
             return done(null, isUserExist);
 
         } catch (error) {
-            console.log(error);
+            // console.log(error);
             done(error);
         }
     })
