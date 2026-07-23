@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
@@ -9,24 +10,57 @@ import { setAuthCookie } from "../../utils/setCookie";
 import { JwtPayload } from "jsonwebtoken";
 import { createUserTokens } from "../../utils/userToken";
 import envVars from "../../config/env";
+import passport from "passport";
 
 const credentialsLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
 
-    const loginInfo = await AuthServices.credentialsLogin(req.body)
-    setAuthCookie(res, loginInfo)
+    // const loginInfo = await AuthServices.credentialsLogin(req.body)
+    passport.authenticate("local", async (err: any, user: any, info: any) => {
+
+      if (err) {
+
+        // return new AppError(401, err); cant do this
+        // return next(err);
+        return next(new AppError(401, err));
+
+      }
+
+      if (!user) {
+        // return new AppError(401, info.message);
+        return next(new AppError(401, info.message));
+      }
+
+      const userTokens = await createUserTokens(user)
+      // delete.user.toObject().password
+
+      const { password: pass, ...rest } = user.toObject();
+
+      setAuthCookie(res, userTokens)
+      sendResponse(res, {
+        success: true,
+        statusCode: httpStatus.OK,
+        message: "User Logged In Successfully!",
+        data: {
+          accessToken: userTokens.accessToken,
+          refreshToken: userTokens.refreshToken,
+          user: rest,
+        },
+      });
+    })(req, res, next)
+
 
     // res.cookie('refreshToken', loginInfo.refreshToken, {
     //   httpOnly: true,
     //   secure: false
     // })
-    
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "User Logged In Successfully!",
-      data: loginInfo,
-    });
+
+    // sendResponse(res, {
+    //   success: true,
+    //   statusCode: httpStatus.OK,
+    //   message: "User Logged In Successfully!",
+    //   data: loginInfo,
+    // });
   },
 );
 
@@ -34,11 +68,11 @@ const credentialsLogin = catchAsync(
 const getNewAccessToken = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const refreshToken = req.cookies.refreshToken
-    if(!refreshToken) {
+    if (!refreshToken) {
       throw new AppError(httpStatus.BAD_REQUEST, 'No refresh token recieved from cookies')
     }
     const tokenInfo = await AuthServices.getNewAccessToken(refreshToken)
-    
+
     setAuthCookie(res, tokenInfo)
 
     sendResponse(res, {
@@ -53,7 +87,7 @@ const getNewAccessToken = catchAsync(
 
 const logout = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    
+
     res.clearCookie("accessToken", {
       httpOnly: true,
       secure: false,
@@ -77,7 +111,7 @@ const logout = catchAsync(
 
 const resetPassword = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    
+
     const oldPassword = req.body.oldPassword;
     const newPassword = req.body.newPassword;
     const decodedToken = req.user;
@@ -97,15 +131,15 @@ const resetPassword = catchAsync(
 const googleCallbackController = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
 
-    let redirectTo = req.query.state ? req.query.state as string : "" ;
+    let redirectTo = req.query.state ? req.query.state as string : "";
 
-    if(redirectTo.startsWith("/")){
+    if (redirectTo.startsWith("/")) {
       redirectTo = redirectTo.slice(1);
     }
-    
+
     const user = req.user;
-    console.log("user", user);
-    if(!user){
+    // console.log("user", user);
+    if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, "User not found")
     }
     const tokenInfo = createUserTokens(user)
@@ -116,9 +150,9 @@ const googleCallbackController = catchAsync(
 );
 
 export const AuthControllers = {
-    credentialsLogin,
-    getNewAccessToken,
-    logout,
-    resetPassword,
-    googleCallbackController
+  credentialsLogin,
+  getNewAccessToken,
+  logout,
+  resetPassword,
+  googleCallbackController
 }
